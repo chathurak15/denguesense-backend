@@ -2,18 +2,18 @@ package com.zeylex.denguesense.model;
 
 import com.zeylex.denguesense.model.enums.RoleType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users")
-@Data
+@Setter
+@Getter
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,11 +46,9 @@ public class User {
 
     private LocalDateTime tokenExpiry;
 
-    @Column(columnDefinition = "integer default 0")
-    private int level = 0;
-
-    @Column
-    private String district;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "district_id")
+    private District district;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -58,4 +56,7 @@ public class User {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "resolvedBy", fetch = FetchType.LAZY)
+    private List<Resolution> resolution;
 }
