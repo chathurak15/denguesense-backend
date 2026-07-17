@@ -66,14 +66,12 @@ public class JwtService implements UserDetailsService {
 
         try {
             authenticate(email, password);
-            // Load user entity (sets this.user via loadUserByUsername)
-            loadUserByUsername(email);
+            UserDetails userDetails = loadUserByUsername(email);
 
-            otpService.generateAndSendOtp(email, "2FA");
-            LoginResponseDTO otpResponse = new LoginResponseDTO();
-            otpResponse.setOtpRequired(true);
-            otpResponse.setEmail(email);
-            return otpResponse;
+            String token = jwtUtil.generateToken(userDetails);
+            UserResponseDTO userResponseDTO = modelMapper.map(user, UserResponseDTO.class);
+            userResponseDTO.setDistrictName(user.getDistrict().getName());
+            return new LoginResponseDTO(userResponseDTO, token);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
