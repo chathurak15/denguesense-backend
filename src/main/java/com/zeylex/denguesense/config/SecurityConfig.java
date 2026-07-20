@@ -51,14 +51,17 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/error",
-                                "/auth/login",
                                 "/api/v1/mail/send",
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/verify-login-otp",
                                 "/api/v1/auth/forgot-password",
                                 "/api/v1/auth/verify-otp",
-                                "/api/v1/auth/reset-password"
+                                "/api/v1/auth/reset-password",
+                                // Anonymous citizen paths — identity via X-Device-UUID header, no JWT
+                                "/api/v1/reports/save",
+                                "/api/v1/reports/my",
+                                "/api/v1/reports/my/**"
                         )
                         .permitAll()
                         .anyRequest().authenticated()
@@ -85,7 +88,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:3000", frontendBaseUrl, frontendVercelUrl));
         config.setAllowCredentials(true);
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization", "Set-Cookie"));
 
