@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserRepo extends JpaRepository<User, Long> {
     User findByEmail(String email);
@@ -20,4 +21,8 @@ public interface UserRepo extends JpaRepository<User, Long> {
     Page<User> findByRoleIn(List<RoleType> roleTypes, Pageable pageable);
 
     Page<User> findByRoleAndStatus(RoleType roleType, String upperCase, Pageable pageable);
+
+    List<User> findByRoleAndDistrict_Id(RoleType role, Long districtId);
+
+    Optional<User> findByTelegramRegistrationCode(String telegramRegistrationCode);
 }

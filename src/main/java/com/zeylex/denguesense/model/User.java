@@ -50,6 +50,13 @@ public class User {
     @JoinColumn(name = "district_id")
     private District district;
 
+    /**
+     * One-time code a PHI types as {@code /register <code>} in Telegram.
+     * Generation and dashboard display are out of scope for the alert module.
+     */
+    @Column(name = "telegram_registration_code", unique = true, length = 64)
+    private String telegramRegistrationCode;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
