@@ -61,7 +61,8 @@ public class SecurityConfig {
                                 // Anonymous citizen paths — identity via X-Device-UUID header, no JWT
                                 "/api/v1/reports/save",
                                 "/api/v1/reports/my",
-                                "/api/v1/reports/my/**"
+                                "/api/v1/reports/my/**",
+                                "/telegram/webhook"
                         )
                         .permitAll()
                         .anyRequest().authenticated()
