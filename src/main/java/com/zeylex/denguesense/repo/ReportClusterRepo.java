@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,11 +27,15 @@ public interface ReportClusterRepo extends JpaRepository<ReportCluster, Long> {
     @Query("""
             SELECT c FROM ReportCluster c
             WHERE c.districtId = :districtId
-              AND c.status = :status
+              AND c.status IN (:statuses)
             ORDER BY c.detectedAt DESC
             LIMIT 1
             """)
-    Optional<ReportCluster> findActiveClusterForUpdate(
+    Optional<ReportCluster> findLiveClusterForUpdate(
             @Param("districtId") Long districtId,
-            @Param("status") ClusterStatus status);
+            @Param("statuses") Collection<ClusterStatus> statuses);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT c FROM ReportCluster c WHERE c.id = :id")
+    Optional<ReportCluster> findByIdForUpdate(@Param("id") Long id);
 }

@@ -56,7 +56,7 @@ public class ClusterDetectionServiceImpl implements ClusterDetectionService {
         acquireDistrictDetectionLock(districtId);
 
         ReportCluster cluster = reportClusterRepo
-                .findActiveClusterForUpdate(districtId, ClusterStatus.ACTIVE)
+                .findLiveClusterForUpdate(districtId, List.of(ClusterStatus.ACTIVE, ClusterStatus.ALERTED))
                 .orElse(null);
 
         boolean isNewCluster = false;
@@ -124,18 +124,22 @@ public class ClusterDetectionServiceImpl implements ClusterDetectionService {
         ReportCluster cluster = reportClusterRepo.findById(clusterId)
                 .orElseThrow(() -> new NotFoundException("Cluster not found with id: " + clusterId));
 
-        if (cluster.getStatus() == ClusterStatus.RESOLVED) {
+        if (cluster.getStatus() == ClusterStatus.CLEARED) {
             return cluster;
         }
-        if (cluster.getStatus() != ClusterStatus.ACTIVE) {
+        if (cluster.getStatus() == ClusterStatus.EXPIRED) {
             throw new InvalidStateException(
-                    "Cluster id=" + clusterId + " cannot be resolved from status " + cluster.getStatus()
-                            + ". Only ACTIVE clusters can be resolved.");
+                    "Cluster id=" + clusterId + " is EXPIRED and cannot be cleared.");
+        }
+        if (cluster.getStatus() != ClusterStatus.ACTIVE && cluster.getStatus() != ClusterStatus.ALERTED) {
+            throw new InvalidStateException(
+                    "Cluster id=" + clusterId + " cannot be cleared from status " + cluster.getStatus()
+                            + ". Only ACTIVE or ALERTED clusters can be cleared.");
         }
 
-        cluster.setStatus(ClusterStatus.RESOLVED);
+        cluster.setStatus(ClusterStatus.CLEARED);
         ReportCluster saved = reportClusterRepo.save(cluster);
-        log.info("Cluster id={} marked RESOLVED", clusterId);
+        log.info("Cluster id={} marked CLEARED", clusterId);
         return saved;
     }
 
