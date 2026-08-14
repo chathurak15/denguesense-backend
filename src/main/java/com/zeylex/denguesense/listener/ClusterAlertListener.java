@@ -2,6 +2,7 @@ package com.zeylex.denguesense.listener;
 
 import com.zeylex.denguesense.event.ClusterDetectedEvent;
 import com.zeylex.denguesense.model.ReportCluster;
+import com.zeylex.denguesense.service.TelegramAlertService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +17,7 @@ public class ClusterAlertListener {
 
     private static final Logger log = LoggerFactory.getLogger(ClusterAlertListener.class);
 
-    // TODO: private final TelegramBotService telegramBotService;
-    // TODO: private final FirebaseFcmService firebaseFcmService;
+    private final TelegramAlertService telegramAlertService;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -31,7 +31,10 @@ public class ClusterAlertListener {
                 event.isNewCluster(),
                 cluster.getAlertedAt());
 
-        // TODO: telegramBotService.sendClusterAlert(cluster);
-        // TODO: firebaseFcmService.pushClusterAlert(cluster);
+        try {
+            telegramAlertService.sendClusterAlert(cluster);
+        } catch (Exception ex) {
+            log.error("Telegram cluster alert failed for cluster id={}: {}", cluster.getId(), ex.getMessage(), ex);
+        }
     }
 }

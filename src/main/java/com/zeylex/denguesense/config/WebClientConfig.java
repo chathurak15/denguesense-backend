@@ -32,4 +32,16 @@ public class WebClientConfig {
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
     }
+
+    @Bean(name = "telegramWebClient")
+    public WebClient telegramWebClient() {
+        HttpClient httpClient = HttpClient.create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+                .responseTimeout(Duration.ofSeconds(10));
+
+        return WebClient.builder()
+                .baseUrl("https://api.telegram.org")
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .build();
+    }
 }
