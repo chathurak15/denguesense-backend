@@ -12,6 +12,7 @@ import com.zeylex.denguesense.model.enums.ReportStatus;
 import com.zeylex.denguesense.repo.ReportRepo;
 import com.zeylex.denguesense.repo.ResolutionRepo;
 import com.zeylex.denguesense.repo.UserRepo;
+import com.zeylex.denguesense.service.ClusterClearingService;
 import com.zeylex.denguesense.service.NotificationService;
 import com.zeylex.denguesense.service.ResolutionService;
 import org.slf4j.Logger;
@@ -34,15 +35,18 @@ public class ResolutionServiceImpl implements ResolutionService {
     private final ResolutionRepo resolutionRepository;
     private final UserRepo              userRepo;
     private final NotificationService   notificationService;
+    private final ClusterClearingService clusterClearingService;
 
     public ResolutionServiceImpl(ReportRepo reportRepo,
                                  ResolutionRepo resolutionRepository,
                                  UserRepo userRepo,
-                                 NotificationService notificationService) {
+                                 NotificationService notificationService,
+                                 ClusterClearingService clusterClearingService) {
         this.reportRepo           = reportRepo;
         this.resolutionRepository = resolutionRepository;
         this.userRepo             = userRepo;
         this.notificationService  = notificationService;
+        this.clusterClearingService = clusterClearingService;
     }
 
 
@@ -100,6 +104,8 @@ public class ResolutionServiceImpl implements ResolutionService {
         } catch (Exception ex) {
             log.warn("Notification failed for resolved report id={}: {}", reportId, ex.getMessage());
         }
+
+        clusterClearingService.checkAndClearAffectedClusters(report);
 
         return toResponseDTO(saved);
     }
