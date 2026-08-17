@@ -28,6 +28,9 @@ public class Report {
     @Column(nullable = false, updatable = false)
     private String deviceUUID;
 
+    @Column(name = "fcm_device_token")
+    private String fcmDeviceToken;
+
     @Column(nullable = false)
     private Double latitude;
 

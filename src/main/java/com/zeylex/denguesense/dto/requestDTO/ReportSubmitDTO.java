@@ -27,4 +27,7 @@ public class ReportSubmitDTO {
 
     @NotNull(message = "Land type is required")
     private LandType landType;
+
+    /** Optional. Present only if the citizen granted push permission. */
+    private String fcmDeviceToken;
 }

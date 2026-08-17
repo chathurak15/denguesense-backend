@@ -87,6 +87,7 @@ public class ReportServiceImpl implements ReportService {
         report.setCnnClassification(null);
         report.setDistrict(district);
         report.setReportStatus(ReportStatus.PENDING);
+        report.setFcmDeviceToken(blankToNull(dto.getFcmDeviceToken()));
 
         Report saved = reportRepo.save(report);
 
@@ -384,5 +385,9 @@ public class ReportServiceImpl implements ReportService {
                 .action(resolution.getAction())
                 .notes(resolution.getNotes())
                 .build();
+    }
+
+    private static String blankToNull(String value) {
+        return (value == null || value.isBlank()) ? null : value.trim();
     }
 }
