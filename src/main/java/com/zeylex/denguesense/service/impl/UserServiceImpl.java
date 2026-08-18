@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
         }
         User user = modelMapper.map(registerDTO, User.class);
         user.setId(null);
-        user.setDistrict(districtRepo.findById(registerDTO.getDistrictId()).orElse(null));
+        user.setDistrict(districtRepo.findById((long) registerDTO.getDistrictId()).orElse(null));
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
         user.setStatus(requestedRole == RoleType.VOLUNTEER ? "APPROVED" : "PENDING");
         try {
@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
         user.setFname(userUpdateDTO.getFname());
         user.setLname(userUpdateDTO.getLname());
         user.setPhoneNumber(userUpdateDTO.getPhoneNumber());
-        user.setDistrict(districtRepo.findById(userUpdateDTO.getDistrictId()).orElse(null));
+        user.setDistrict(districtRepo.findById((long) userUpdateDTO.getDistrictId()).orElse(null));
         user.setImage(userUpdateDTO.getImage());
         userRepo.save(user);
         return "User updated successfully";

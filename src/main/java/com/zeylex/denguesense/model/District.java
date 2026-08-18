@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.locationtech.jts.geom.Point;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -24,6 +23,21 @@ public class District {
     private String province;
 
     private String rdhsZone;
+
+    @Column(name = "rdhs_model_id")
+    private Integer rdhsModelId;
+
+    @Column(name = "zone_dry_zone")
+    private Boolean zoneDryZone;
+
+    @Column(name = "zone_intermediate_zone")
+    private Boolean zoneIntermediateZone;
+
+    @Column(name = "zone_wet_zone")
+    private Boolean zoneWetZone;
+
+    @Column(name = "population_density")
+    private Double populationDensity;
 
     @Column(columnDefinition = "geography(Point,4326)")
     private Point centroid;
