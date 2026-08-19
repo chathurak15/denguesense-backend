@@ -44,4 +44,19 @@ public class WebClientConfig {
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
     }
+
+    @Bean(name = "openMeteoWebClient")
+    public WebClient openMeteoWebClient(
+            @Value("${open-meteo.base-url:https://archive-api.open-meteo.com}") String openMeteoBaseUrl,
+            @Value("${open-meteo.timeout.connect-ms:10000}") int openMeteoConnectTimeoutMs,
+            @Value("${open-meteo.timeout.read-ms:30000}") int openMeteoReadTimeoutMs) {
+        HttpClient httpClient = HttpClient.create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, openMeteoConnectTimeoutMs)
+                .responseTimeout(Duration.ofMillis(openMeteoReadTimeoutMs));
+
+        return WebClient.builder()
+                .baseUrl(openMeteoBaseUrl)
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .build();
+    }
 }
