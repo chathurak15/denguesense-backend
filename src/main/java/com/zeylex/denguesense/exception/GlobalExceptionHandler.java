@@ -83,5 +83,35 @@ public class GlobalExceptionHandler {
         body.put("path", request.getRequestURI());
         return new ResponseEntity<>(body, HttpStatus.BAD_GATEWAY);
     }
+
+    @ExceptionHandler(InsufficientHistoryException.class)
+    public ResponseEntity<Map<String, Object>> handleInsufficientHistory(InsufficientHistoryException ex, HttpServletRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now().toString());
+        body.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
+        body.put("message", ex.getMessage());
+        body.put("path", request.getRequestURI());
+        return new ResponseEntity<>(body, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(AiServiceException.class)
+    public ResponseEntity<Map<String, Object>> handleAiServiceException(AiServiceException ex, HttpServletRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now().toString());
+        body.put("status", HttpStatus.BAD_GATEWAY.value());
+        body.put("message", ex.getMessage());
+        body.put("path", request.getRequestURI());
+        return new ResponseEntity<>(body, HttpStatus.BAD_GATEWAY);
+    }
+
+    @ExceptionHandler(WeatherFetchException.class)
+    public ResponseEntity<Map<String, Object>> handleWeatherFetchException(WeatherFetchException ex, HttpServletRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now().toString());
+        body.put("status", HttpStatus.BAD_GATEWAY.value());
+        body.put("message", ex.getMessage());
+        body.put("path", request.getRequestURI());
+        return new ResponseEntity<>(body, HttpStatus.BAD_GATEWAY);
+    }
 }
 
