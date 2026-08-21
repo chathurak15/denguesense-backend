@@ -59,9 +59,9 @@ class WeeklyCaseQueryServiceImplTest {
                 record(district(2L, "Gampaha"), weekStart, weekEnd, 154, 1980)
         ));
         int year = LocalDate.now().getYear();
-        when(dengueCaseRecordRepo.sumWeekCasesBetween(
-                LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31), false, 0L))
-                .thenReturn(6100L);
+        when(dengueCaseRecordRepo.sumLatestYearToDateCases(
+                LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31)))
+                .thenReturn(java.math.BigDecimal.valueOf(6100));
 
         DengueCaseSummaryDTO summary = service.getSummary("admin@health.gov.lk");
 
@@ -71,6 +71,7 @@ class WeeklyCaseQueryServiceImplTest {
         assertThat(summary.lastWeekRdhsExpected()).isEqualTo(26);
         assertThat(summary.lastWeekCases()).isEqualTo(422L);
         assertThat(summary.lastWeekCumulativeTotal()).isEqualTo(6100L);
+        assertThat(summary.nationalYearCases()).isEqualTo(6100L);
         assertThat(summary.scopedToDistrict()).isFalse();
         assertThat(summary.districtYearCumulative()).isNull();
     }
@@ -90,9 +91,9 @@ class WeeklyCaseQueryServiceImplTest {
                 record(district(2L, "Gampaha"), weekStart, weekEnd, 154, 1980)
         ));
         int year = LocalDate.now().getYear();
-        when(dengueCaseRecordRepo.sumWeekCasesBetween(
-                LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31), false, 0L))
-                .thenReturn(6100L);
+        when(dengueCaseRecordRepo.sumLatestYearToDateCases(
+                LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31)))
+                .thenReturn(java.math.BigDecimal.valueOf(6100));
         when(dengueCaseRecordRepo.sumWeekCasesBetween(
                 LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31), true, 1L))
                 .thenReturn(268L);
