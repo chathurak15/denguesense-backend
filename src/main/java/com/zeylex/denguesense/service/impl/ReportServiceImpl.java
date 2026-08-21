@@ -20,6 +20,7 @@ import com.zeylex.denguesense.repo.ReportRepo;
 import com.zeylex.denguesense.repo.UserRepo;
 import com.zeylex.denguesense.service.AiClassificationService;
 import com.zeylex.denguesense.service.CloudinaryService;
+import com.zeylex.denguesense.service.ClusterDetectionTrigger;
 import com.zeylex.denguesense.service.DistrictService;
 import com.zeylex.denguesense.service.ReportService;
 import com.zeylex.denguesense.util.GeoUtils;
@@ -31,6 +32,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -58,17 +61,20 @@ public class ReportServiceImpl implements ReportService {
     private final DistrictService districtService;
     private final CloudinaryService cloudinaryService;
     private final AiClassificationService aiClassificationService;
+    private final ClusterDetectionTrigger clusterDetectionTrigger;
 
     public ReportServiceImpl(ReportRepo reportRepo,
                              UserRepo userRepo,
                              DistrictService districtService,
                              CloudinaryService cloudinaryService,
-                             AiClassificationService aiClassificationService) {
+                             AiClassificationService aiClassificationService,
+                             ClusterDetectionTrigger clusterDetectionTrigger) {
         this.reportRepo                = reportRepo;
         this.userRepo                  = userRepo;
         this.districtService           = districtService;
         this.cloudinaryService         = cloudinaryService;
         this.aiClassificationService   = aiClassificationService;
+        this.clusterDetectionTrigger   = clusterDetectionTrigger;
     }
 
     @Override
@@ -114,12 +120,52 @@ public class ReportServiceImpl implements ReportService {
 
             saved = reportRepo.save(saved);
 
+            // Inline hotspot detection — sequential/synchronous per the submission sequence diagram,
+            // but deferred until AFTER this transaction commits so the spatial query sees the
+            // just-persisted CLASSIFIED report and a clustering failure can never roll it back.
+            if (saved.getReportStatus() == ReportStatus.CLASSIFIED) {
+                Long districtId = saved.getDistrict() != null ? saved.getDistrict().getId() : null;
+                triggerClusterDetectionAfterCommit(saved.getId(), districtId);
+            }
+
         } catch (AiServiceException | IllegalArgumentException ex) {
             log.warn("CNN classification failed for report id={}, imageUrl={}. "
                     + "Report saved with status=PENDING and no classification. Reason: {}",
                     saved.getId(), imageUrl, ex.getMessage());
         }
         return toResponseDTO(saved);
+    }
+
+    /**
+     * Schedules inline cluster detection to run once the current report-save transaction commits.
+     * <p>Chosen approach: {@code afterCommit} synchronization rather than an inline
+     * {@code REQUIRES_NEW} call, because the 500 m spatial query must see the freshly-committed
+     * report row (its geography + CLASSIFIED status). Running before commit would either miss the
+     * new report or fight its own uncommitted write. If no transaction is active (e.g. unit tests),
+     * we fall back to running immediately — still fully wrapped so clustering can never break submission.
+     */
+    private void triggerClusterDetectionAfterCommit(Long reportId, Long districtId) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    runClusterDetectionSafely(reportId, districtId);
+                }
+            });
+        } else {
+            runClusterDetectionSafely(reportId, districtId);
+        }
+    }
+
+    private void runClusterDetectionSafely(Long reportId, Long districtId) {
+        try {
+            log.info("Triggering inline cluster detection for report id={} district id={}", reportId, districtId);
+            clusterDetectionTrigger.triggerForClassifiedReport(reportId);
+        } catch (Exception ex) {
+            // Failure isolation: report submission has already committed and must remain successful.
+            log.error("Inline cluster detection failed for report id={} district id={}: {} "
+                            + "— report submission is unaffected", reportId, districtId, ex.getMessage(), ex);
+        }
     }
 
     @Override
@@ -290,6 +336,7 @@ public class ReportServiceImpl implements ReportService {
         dto.setId(report.getId());
         dto.setLatitude(report.getLatitude());
         dto.setLongitude(report.getLongitude());
+        dto.setImageUrl(report.getImageUrl());
         dto.setLandType(report.getLandType());
         dto.setReportStatus(report.getReportStatus());
         dto.setSubmittedAt(report.getSubmittedAt());
@@ -330,6 +377,7 @@ public class ReportServiceImpl implements ReportService {
         dto.setId(report.getId());
         dto.setLatitude(report.getLatitude());
         dto.setLongitude(report.getLongitude());
+        dto.setImageUrl(report.getImageUrl());
         dto.setLandType(report.getLandType());
         dto.setReportStatus(report.getReportStatus());
         dto.setSubmittedAt(report.getSubmittedAt());

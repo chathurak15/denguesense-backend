@@ -18,6 +18,7 @@ public class ReportResponseDTO {
     private Long id;
     private Double latitude;
     private Double longitude;
+    private String imageUrl;
     private LandType landType;
     private ReportStatus reportStatus;
     private String districtName;
