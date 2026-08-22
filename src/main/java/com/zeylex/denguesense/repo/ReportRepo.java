@@ -72,6 +72,20 @@ public interface ReportRepo extends JpaRepository<Report, Long>, JpaSpecificatio
             Long districtId, LocalDateTime from, LocalDateTime toExclusive);
 
     @Query("""
+            SELECT r FROM Report r
+            JOIN FETCH r.cnnClassification c
+            LEFT JOIN FETCH r.district
+            WHERE r.reportStatus IN :statuses
+              AND r.submittedAt >= :since
+              AND c.riskLabel <> :invalid
+            ORDER BY r.submittedAt DESC
+            """)
+    List<Report> findRecentClassifiedForMap(
+            @Param("statuses") Collection<ReportStatus> statuses,
+            @Param("since") LocalDateTime since,
+            @Param("invalid") RiskLabel invalid);
+
+    @Query("""
             SELECT COUNT(r) FROM Report r
             JOIN r.cnnClassification c
             WHERE r.district.id = :districtId
