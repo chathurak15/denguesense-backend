@@ -1,5 +1,6 @@
 package com.zeylex.denguesense.dto.responseDTO;
 
+import com.zeylex.denguesense.model.District;
 import com.zeylex.denguesense.model.enums.RoleType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +19,7 @@ public class UserResponseDTO {
     private String phoneNumber;
     private String status;
     private RoleType role;
-    private String district;
+    private String districtName;
     private String image;
     private LocalDateTime createdAt;
 }
