@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -26,13 +27,10 @@ import java.util.List;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-
     @Value("${denguesense.frontend.base.url}")
     private String frontendBaseUrl;
-
     @Value("${denguesense.frontend.base.url}")
     private String frontendVercelUrl;
-
     @Autowired
     private JwtFilter jwtFilter;
 
@@ -47,7 +45,8 @@ public class SecurityConfig {
                 .cors(c -> c.configurationSource(corsConfigurationSource()))
                 .csrf(c -> c.disable())
                 .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->authorizationManagerRequestMatcherRegistry
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/",
                                 "/error",
@@ -58,10 +57,11 @@ public class SecurityConfig {
                                 "/api/v1/auth/forgot-password",
                                 "/api/v1/auth/verify-otp",
                                 "/api/v1/auth/reset-password",
-                                // Anonymous citizen paths — identity via X-Device-UUID header, no JWT
                                 "/api/v1/reports/save",
                                 "/api/v1/reports/my",
                                 "/api/v1/reports/my/**",
+                                "/api/v1/public",
+                                "/api/v1/public/**",
                                 "/telegram/webhook"
                         )
                         .permitAll()
@@ -87,7 +87,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", frontendBaseUrl, frontendVercelUrl));
+        config.setAllowedOrigins(List.of("Access-Control-Allow-Origin", frontendBaseUrl, frontendVercelUrl));
         config.setAllowCredentials(true);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
