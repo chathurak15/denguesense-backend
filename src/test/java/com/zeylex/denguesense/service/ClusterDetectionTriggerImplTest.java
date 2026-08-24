@@ -149,18 +149,66 @@ class ClusterDetectionTriggerImplTest {
     }
 
     @Test
-    @DisplayName("detectForDistrict → delegates when district has enough open HIGH_RISK reports")
-    void detectForDistrict_delegates() {
+    @DisplayName("detectForDistrict → persists one 500m neighbourhood that meets the threshold")
+    void detectForDistrict_persistsNeighbourhood() {
+        List<Report> five = neighbours(5);
         when(reportRepo.findActiveHighRiskByDistrict(eq(DISTRICT_ID), any(LocalDateTime.class)))
-                .thenReturn(neighbours(5));
+                .thenReturn(five);
+        when(reportRepo.findActiveHighRiskNeighbors(eq(101L), eq(DISTRICT_ID), any(LocalDateTime.class), anyDouble()))
+                .thenReturn(five);
         when(clusterDetectionService.persistClusterDetection(eq(DISTRICT_ID), any()))
                 .thenReturn(cluster(9L, ClusterStatus.ACTIVE, 5));
 
-        ReportCluster result = trigger.detectForDistrict(DISTRICT_ID);
+        List<ReportCluster> result = trigger.detectForDistrict(DISTRICT_ID);
 
-        assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(9L);
-        verify(clusterDetectionService).persistClusterDetection(eq(DISTRICT_ID), any());
+        assertThat(result).extracting(ReportCluster::getId).containsExactly(9L);
+        ArgumentCaptor<List<Report>> captor = ArgumentCaptor.forClass(List.class);
+        verify(clusterDetectionService).persistClusterDetection(eq(DISTRICT_ID), captor.capture());
+        assertThat(captor.getValue()).hasSize(5);
+    }
+
+    @Test
+    @DisplayName("detectForDistrict → two disjoint 500m hotspots persist as two clusters")
+    void detectForDistrict_twoDisjointHotspots() {
+        List<Report> first = neighbours(5);
+        List<Report> second = IntStream.rangeClosed(6, 10)
+                .mapToObj(i -> highRiskClassified(100 + i))
+                .toList();
+        List<Report> all = new ArrayList<>();
+        all.addAll(first);
+        all.addAll(second);
+
+        when(reportRepo.findActiveHighRiskByDistrict(eq(DISTRICT_ID), any(LocalDateTime.class)))
+                .thenReturn(all);
+        when(reportRepo.findActiveHighRiskNeighbors(eq(101L), eq(DISTRICT_ID), any(LocalDateTime.class), anyDouble()))
+                .thenReturn(first);
+        when(reportRepo.findActiveHighRiskNeighbors(eq(106L), eq(DISTRICT_ID), any(LocalDateTime.class), anyDouble()))
+                .thenReturn(second);
+        when(clusterDetectionService.persistClusterDetection(eq(DISTRICT_ID), eq(first)))
+                .thenReturn(cluster(1L, ClusterStatus.ALERTED, 5));
+        when(clusterDetectionService.persistClusterDetection(eq(DISTRICT_ID), eq(second)))
+                .thenReturn(cluster(2L, ClusterStatus.ACTIVE, 5));
+
+        List<ReportCluster> result = trigger.detectForDistrict(DISTRICT_ID);
+
+        assertThat(result).extracting(ReportCluster::getId).containsExactly(1L, 2L);
+        verify(clusterDetectionService).persistClusterDetection(DISTRICT_ID, first);
+        verify(clusterDetectionService).persistClusterDetection(DISTRICT_ID, second);
+    }
+
+    @Test
+    @DisplayName("detectForDistrict → enough district reports but none within 500m → no cluster")
+    void detectForDistrict_scatteredReports_noCluster() {
+        List<Report> five = neighbours(5);
+        when(reportRepo.findActiveHighRiskByDistrict(eq(DISTRICT_ID), any(LocalDateTime.class)))
+                .thenReturn(five);
+        when(reportRepo.findActiveHighRiskNeighbors(anyLong(), eq(DISTRICT_ID), any(LocalDateTime.class), anyDouble()))
+                .thenAnswer(inv -> List.of(highRiskClassified(inv.getArgument(0))));
+
+        List<ReportCluster> result = trigger.detectForDistrict(DISTRICT_ID);
+
+        assertThat(result).isEmpty();
+        verify(clusterDetectionService, never()).persistClusterDetection(anyLong(), any());
     }
 
     private static ReportCluster cluster(Long id, ClusterStatus status, int count) {

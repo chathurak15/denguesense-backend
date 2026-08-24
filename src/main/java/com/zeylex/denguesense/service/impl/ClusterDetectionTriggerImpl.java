@@ -16,7 +16,12 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class ClusterDetectionTriggerImpl implements ClusterDetectionTrigger {
@@ -34,6 +39,7 @@ public class ClusterDetectionTriggerImpl implements ClusterDetectionTrigger {
         this.clusterDetectionService = clusterDetectionService;
         this.props = props;
     }
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void triggerForClassifiedReport(Long reportId) {
@@ -83,7 +89,7 @@ public class ClusterDetectionTriggerImpl implements ClusterDetectionTrigger {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public ReportCluster detectForDistrict(Long districtId) {
+    public List<ReportCluster> detectForDistrict(Long districtId) {
         if (districtId == null) {
             throw new IllegalArgumentException("districtId must not be null");
         }
@@ -97,13 +103,32 @@ public class ClusterDetectionTriggerImpl implements ClusterDetectionTrigger {
         if (active.size() < props.getMinClusterSize()) {
             log.info("Manual cluster detection: district id={} — {} reports < threshold {}, no cluster formed",
                     districtId, active.size(), props.getMinClusterSize());
-            return null;
+            return List.of();
         }
 
-        ReportCluster cluster = clusterDetectionService.persistClusterDetection(districtId, active);
-        log.info("Manual cluster detection complete: district id={} → clusterId={} status={} memberCount={}",
-                districtId, cluster.getId(), cluster.getStatus(), cluster.getReportCount());
-        return cluster;
+        Set<Long> assigned = new HashSet<>();
+        Map<Long, ReportCluster> formed = new LinkedHashMap<>();
+        for (Report seed : active) {
+            if (seed == null || seed.getId() == null || assigned.contains(seed.getId())) {
+                continue;
+            }
+            List<Report> neighbors = reportRepo.findActiveHighRiskNeighbors(
+                    seed.getId(), districtId, since, props.getRadiusMeters());
+            if (neighbors.size() < props.getMinClusterSize()) {
+                continue;
+            }
+            ReportCluster cluster = clusterDetectionService.persistClusterDetection(districtId, neighbors);
+            formed.put(cluster.getId(), cluster);
+            for (Report neighbour : neighbors) {
+                if (neighbour != null && neighbour.getId() != null) {
+                    assigned.add(neighbour.getId());
+                }
+            }
+        }
+
+        log.info("Manual cluster detection complete: district id={} → {} cluster(s)",
+                districtId, formed.size());
+        return new ArrayList<>(formed.values());
     }
 
     private static boolean isHighRisk(Report report) {
