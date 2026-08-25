@@ -32,3 +32,4 @@ build/
 
 ### VS Code ###
 .vscode/
+/src/main/resources/denguesenselk-firebase-adminsdk-fbsvc-3f0d960905.json
