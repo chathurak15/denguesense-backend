@@ -9,6 +9,7 @@ import com.zeylex.denguesense.model.User;
 import com.zeylex.denguesense.model.enums.RoleType;
 import com.zeylex.denguesense.repo.DistrictRepo;
 import com.zeylex.denguesense.repo.UserRepo;
+import com.zeylex.denguesense.service.TelegramConnectService;
 import com.zeylex.denguesense.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private DistrictRepo districtRepo;
 
+    @Autowired
+    private TelegramConnectService telegramConnectService;
+
     @Override
     public String registerUser(RegisterDTO registerDTO) {
         RoleType requestedRole = registerDTO.getRole();
@@ -50,6 +54,7 @@ public class UserServiceImpl implements UserService {
         user.setDistrict(districtRepo.findById((long) registerDTO.getDistrictId()).orElse(null));
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
         user.setStatus(requestedRole == RoleType.VOLUNTEER ? "APPROVED" : "PENDING");
+        telegramConnectService.assignCodeIfNeeded(user);
         try {
             userRepo.save(user);
             return "User registered successfully";
@@ -102,6 +107,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) return "User not found";
 
         user.setStatus(upperStatus);
+        telegramConnectService.assignCodeIfNeeded(user);
         userRepo.save(user);
         return "User status updated successfully";
     }
@@ -124,7 +130,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO getUserById(Long id) {
         return userRepo.findById(id)
-                .map(u -> modelMapper.map(u, UserResponseDTO.class))
+                .map(this::toResponse)
                 .orElse(null);
     }
 
@@ -132,8 +138,7 @@ public class UserServiceImpl implements UserService {
     public UserResponseDTO loadUserByUsername(String email) {
         User user = userRepo.findByEmail(email);
         if (user == null) throw new NotFoundException("User not found");
-        UserResponseDTO dto = modelMapper.map(user, UserResponseDTO.class);
-        return dto;
+        return toResponse(user);
     }
 
     @Override
@@ -154,6 +159,15 @@ public class UserServiceImpl implements UserService {
         return "Password reset successfully";
     }
 
+    private UserResponseDTO toResponse(User user) {
+        UserResponseDTO dto = modelMapper.map(user, UserResponseDTO.class);
+        if (user.getDistrict() != null) {
+            dto.setDistrictName(user.getDistrict().getName());
+        }
+        telegramConnectService.applyTo(user, dto);
+        return dto;
+    }
+
     private PaginatedDTO mapPageToDto(Page<User> page) {
         if (!page.hasContent()) {
             PaginatedDTO empty = new PaginatedDTO();
@@ -163,7 +177,7 @@ public class UserServiceImpl implements UserService {
             return empty;
         }
         List<UserResponseDTO> dtos = page.getContent().stream()
-                .map(u -> modelMapper.map(u, UserResponseDTO.class))
+                .map(this::toResponse)
                 .collect(Collectors.toList());
         PaginatedDTO result = new PaginatedDTO();
         result.setContent(dtos);

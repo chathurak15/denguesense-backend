@@ -1,5 +1,6 @@
 package com.zeylex.denguesense.service.impl;
 
+import com.zeylex.denguesense.dto.responseDTO.ClusterResponseDTO;
 import com.zeylex.denguesense.model.Notification;
 import com.zeylex.denguesense.model.ReportCluster;
 import com.zeylex.denguesense.model.TelegramRegistration;
@@ -12,17 +13,16 @@ import com.zeylex.denguesense.model.enums.RoleType;
 import com.zeylex.denguesense.repo.ReportClusterRepo;
 import com.zeylex.denguesense.repo.TelegramRegistrationRepo;
 import com.zeylex.denguesense.repo.UserRepo;
+import com.zeylex.denguesense.service.ClusterQueryService;
 import com.zeylex.denguesense.service.NotificationRecordService;
 import com.zeylex.denguesense.service.TelegramAlertService;
+import com.zeylex.denguesense.service.TelegramClient;
+import com.zeylex.denguesense.util.TelegramAlertMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,23 +35,23 @@ public class TelegramAlertServiceImpl implements TelegramAlertService {
     private final TelegramRegistrationRepo telegramRegistrationRepo;
     private final NotificationRecordService notificationRecordService;
     private final ReportClusterRepo reportClusterRepo;
-    private final WebClient telegramWebClient;
-    private final String botToken;
+    private final ClusterQueryService clusterQueryService;
+    private final TelegramClient telegramClient;
     private final String frontendBaseUrl;
 
     public TelegramAlertServiceImpl(UserRepo userRepo,
                                     TelegramRegistrationRepo telegramRegistrationRepo,
                                     NotificationRecordService notificationRecordService,
                                     ReportClusterRepo reportClusterRepo,
-                                    @Qualifier("telegramWebClient") WebClient telegramWebClient,
-                                    @Value("${telegram.bot.token:}") String botToken,
+                                    ClusterQueryService clusterQueryService,
+                                    TelegramClient telegramClient,
                                     @Value("${denguesense.frontend.base.url:http://localhost:3000}") String frontendBaseUrl) {
         this.userRepo = userRepo;
         this.telegramRegistrationRepo = telegramRegistrationRepo;
         this.notificationRecordService = notificationRecordService;
         this.reportClusterRepo = reportClusterRepo;
-        this.telegramWebClient = telegramWebClient;
-        this.botToken = botToken;
+        this.clusterQueryService = clusterQueryService;
+        this.telegramClient = telegramClient;
         this.frontendBaseUrl = frontendBaseUrl;
     }
 
@@ -69,13 +69,16 @@ public class TelegramAlertServiceImpl implements TelegramAlertService {
             return;
         }
 
-        String messageBody = buildAlertMessage(cluster);
+        ClusterResponseDTO summary = loadSummary(cluster, officers.get(0));
+        String messageBody = TelegramAlertMessages.clusterAlert(cluster, summary, frontendBaseUrl);
+        Map<String, Object> keyboard = TelegramAlertMessages.clusterAlertKeyboard(
+                cluster.getId(), summary, frontendBaseUrl);
         log.info("Sending Telegram cluster alert clusterId={} districtId={} phiCount={}",
                 cluster.getId(), cluster.getDistrictId(), officers.size());
 
         for (User officer : officers) {
             try {
-                deliverToOfficer(cluster, officer, messageBody);
+                deliverToOfficer(cluster, officer, messageBody, keyboard);
             } catch (Exception ex) {
                 log.error("Unexpected error alerting PHI userId={} for cluster id={}: {}",
                         officer.getId(), cluster.getId(), ex.getMessage(), ex);
@@ -83,7 +86,23 @@ public class TelegramAlertServiceImpl implements TelegramAlertService {
         }
     }
 
-    private void deliverToOfficer(ReportCluster cluster, User officer, String messageBody) {
+    private ClusterResponseDTO loadSummary(ReportCluster cluster, User officer) {
+        if (officer == null || officer.getEmail() == null) {
+            return null;
+        }
+        try {
+            return clusterQueryService.getById(officer.getEmail(), cluster.getId());
+        } catch (Exception ex) {
+            log.warn("Could not enrich Telegram cluster alert for clusterId={}: {}",
+                    cluster.getId(), ex.getMessage());
+            return null;
+        }
+    }
+
+    private void deliverToOfficer(ReportCluster cluster,
+                                  User officer,
+                                  String messageBody,
+                                  Map<String, Object> keyboard) {
         var registration = telegramRegistrationRepo.findByUser_Id(officer.getId());
         if (registration.isEmpty()) {
             Notification skipped = newNotification(cluster, messageBody);
@@ -105,16 +124,23 @@ public class TelegramAlertServiceImpl implements TelegramAlertService {
         Notification saved = notificationRecordService.saveInNewTransaction(pending);
 
         try {
-            sendTelegramMessage(telegram.getChatId(), messageBody);
-            notificationRecordService.markSent(saved.getId());
-            markClusterAlerted(cluster.getId());
-            log.info("SENT Telegram alert notificationId={} PHI userId={} clusterId={}",
-                    saved.getId(), officer.getId(), cluster.getId());
+            telegramClient.sendHtml(telegram.getChatId(), messageBody, keyboard);
         } catch (Exception ex) {
             notificationRecordService.markFailed(saved.getId(), ex.getMessage());
             log.warn("FAILED Telegram alert notificationId={} PHI userId={} clusterId={}: {}",
                     saved.getId(), officer.getId(), cluster.getId(), ex.getMessage());
+            return;
         }
+
+        notificationRecordService.markSent(saved.getId());
+        try {
+            markClusterAlerted(cluster.getId());
+        } catch (Exception ex) {
+            log.error("Telegram already sent for notificationId={} clusterId={} but ALERTED transition failed: {}",
+                    saved.getId(), cluster.getId(), ex.getMessage(), ex);
+        }
+        log.info("SENT Telegram alert notificationId={} PHI userId={} clusterId={}",
+                saved.getId(), officer.getId(), cluster.getId());
     }
 
     private Notification newNotification(ReportCluster cluster, String messageBody) {
@@ -126,68 +152,15 @@ public class TelegramAlertServiceImpl implements TelegramAlertService {
         return notification;
     }
 
-    private String buildAlertMessage(ReportCluster cluster) {
-        int count = cluster.getReportCount() == null ? 0 : cluster.getReportCount();
-        String severity = severityFor(count);
-        String dashboardUrl = trimSlash(frontendBaseUrl) + "/phi/clusters/" + cluster.getId();
-        return """
-                DengueSense LK cluster alert
-                Severity: %s
-                District ID: %s
-                Reports in cluster: %s
-                Detected at: %s
-                Dashboard: %s
-                """.formatted(severity, cluster.getDistrictId(), count, cluster.getDetectedAt(), dashboardUrl);
-    }
-
     static String severityFor(int reportCount) {
-        if (reportCount >= 10) {
-            return "CRITICAL";
-        }
-        if (reportCount >= 5) {
-            return "HIGH";
-        }
-        return "MODERATE";
-    }
-
-    private void sendTelegramMessage(String chatId, String text) {
-        if (botToken == null || botToken.isBlank()) {
-            throw new IllegalStateException("telegram.bot.token is not configured");
-        }
-
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("chat_id", chatId);
-        payload.put("text", text);
-
-        @SuppressWarnings("unchecked")
-        Map<String, Object> response = telegramWebClient.post()
-                .uri("/bot{token}/sendMessage", botToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .retrieve()
-                .bodyToMono(Map.class)
-                .block();
-
-        if (response == null || !Boolean.TRUE.equals(response.get("ok"))) {
-            String description = response == null ? "empty Telegram response" : String.valueOf(response.get("description"));
-            throw new IllegalStateException("Telegram sendMessage failed: " + description);
-        }
+        return TelegramAlertMessages.severityFor(reportCount);
     }
 
     private void markClusterAlerted(Long clusterId) {
-        reportClusterRepo.findById(clusterId).ifPresent(cluster -> {
-            if (cluster.getStatus() == ClusterStatus.ACTIVE) {
-                cluster.setStatus(ClusterStatus.ALERTED);
-                reportClusterRepo.save(cluster);
-                log.info("Cluster id={} transitioned ACTIVE → ALERTED after a successful Telegram send", clusterId);
-            }
-        });
-    }
-
-    private static String trimSlash(String url) {
-        if (url == null || url.isBlank()) {
-            return "http://localhost:3000";
+        int updated = reportClusterRepo.updateStatusIfCurrent(
+                clusterId, ClusterStatus.ACTIVE, ClusterStatus.ALERTED);
+        if (updated > 0) {
+            log.info("Cluster id={} transitioned ACTIVE → ALERTED after a successful Telegram send", clusterId);
         }
-        return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
     }
 }

@@ -21,5 +21,7 @@ public class UserResponseDTO {
     private RoleType role;
     private String districtName;
     private String image;
+    private Boolean telegramConnected;
+    private String telegramConnectUrl;
     private LocalDateTime createdAt;
 }

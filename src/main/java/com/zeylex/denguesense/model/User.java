@@ -51,8 +51,8 @@ public class User {
     private District district;
 
     /**
-     * One-time code a PHI types as {@code /register <code>} in Telegram.
-     * Generation and dashboard display are out of scope for the alert module.
+     * One-time code used as the Telegram {@code start} payload.
+     * Assigned automatically for PHI accounts; the dashboard opens a deep link so officers do not type it.
      */
     @Column(name = "telegram_registration_code", unique = true, length = 64)
     private String telegramRegistrationCode;
