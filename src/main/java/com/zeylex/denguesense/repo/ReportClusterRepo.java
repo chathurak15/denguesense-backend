@@ -20,6 +20,8 @@ public interface ReportClusterRepo extends JpaRepository<ReportCluster, Long> {
 
     List<ReportCluster> findByDistrictIdAndStatus(Long districtId, ClusterStatus status);
 
+    List<ReportCluster> findByStatusInOrderByDetectedAtDesc(Collection<ClusterStatus> statuses);
+
     Optional<ReportCluster> findFirstByDistrictIdAndStatusOrderByDetectedAtDesc(
             Long districtId, ClusterStatus status);
 
