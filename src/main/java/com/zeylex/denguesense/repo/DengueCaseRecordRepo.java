@@ -79,6 +79,27 @@ public interface DengueCaseRecordRepo extends JpaRepository<DengueCaseRecord, Lo
             @Param("hasDistrict") boolean hasDistrict,
             @Param("districtId") long districtId);
 
+    /**
+     * National year-to-date: latest cumulative_cases per district in the year.
+     * Summing week_cases across every week overweight districts (often Colombo)
+     * that have a full import history.
+     */
+    @Query(value = """
+            SELECT COALESCE(SUM(COALESCE(latest.cumulative_cases, latest.week_cases)), 0)
+            FROM (
+                SELECT DISTINCT ON (district_id)
+                       cumulative_cases,
+                       week_cases
+                FROM dengue_case_records
+                WHERE week_start_date >= :yearStart
+                  AND week_start_date <= :yearEnd
+                ORDER BY district_id ASC, week_start_date DESC
+            ) latest
+            """, nativeQuery = true)
+    Object sumLatestYearToDateCases(
+            @Param("yearStart") LocalDate yearStart,
+            @Param("yearEnd") LocalDate yearEnd);
+
     Optional<DengueCaseRecord> findFirstByDistrict_IdAndWeekStartDateGreaterThanEqualOrderByWeekStartDateDesc(
             Long districtId, LocalDate yearStart);
 }

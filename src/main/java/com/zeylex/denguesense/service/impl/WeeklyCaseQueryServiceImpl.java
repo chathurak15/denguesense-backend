@@ -92,8 +92,10 @@ public class WeeklyCaseQueryServiceImpl implements WeeklyCaseQueryService {
                 .distinct()
                 .count();
 
-        long nationalYearCases = dengueCaseRecordRepo.sumWeekCasesBetween(
-                yearStart, yearEnd, false, 0L);
+        Object latestByDistrict = dengueCaseRecordRepo.sumLatestYearToDateCases(yearStart, yearEnd);
+        long nationalYearCases = asLong(latestByDistrict) > 0
+                ? asLong(latestByDistrict)
+                : lastWeekCumulativeTotal;
 
         Long districtYearCumulative = null;
         Long districtYearCases = null;
@@ -193,5 +195,19 @@ public class WeeklyCaseQueryServiceImpl implements WeeklyCaseQueryService {
             return district.getRdhsZone();
         }
         return district.getName();
+    }
+
+    private static long asLong(Object value) {
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        if (value == null) {
+            return 0L;
+        }
+        try {
+            return Long.parseLong(value.toString());
+        } catch (NumberFormatException ignored) {
+            return 0L;
+        }
     }
 }
