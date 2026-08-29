@@ -1,0 +1,1858 @@
+{
+  "info": {
+    "_postman_id": "3398e91a-b09c-4783-b2ae-3620ab88a0da",
+    "name": "Denguesense.lk",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "24006564",
+    "_collection_link": "https://go.postman.co/collection/24006564-3398e91a-b09c-4783-b2ae-3620ab88a0da?source=collection_link",
+    "description": "DengueSense.lk API collection.\n\nSet `baseURL` to `http://localhost:8080/api/v1` (or your deployed API + /api/v1).\nSet `serverURL` to `http://localhost:8080` (used only by Telegram webhook).\n\nAuth: POST /auth/login sets an HttpOnly JWT cookie. Enable Postman cookie interceptor or send the cookie automatically on later requests.\nCitizen report routes need header `X-Device-UUID` (valid UUID).\n\nrdhsId: Colombo = 4 (alphabetical LSTM ids 0-25)."
+  },
+  "item": [
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"chathurakavindu15@gmail.com\",\r\n    \"password\": \"12345678\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/auth/login",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"fname\": \"Dengue\",\r\n  \"lname\": \"Sense\",\r\n  \"email\": \"bandipro41@gmail.com\",\r\n  \"password\": \"12345678\",\r\n  \"image\":\"\",\r\n  \"phoneNumber\": \"0741550909\",\r\n  \"role\": \"PHI\",\r\n  \"districtId\":0\r\n  \r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/auth/register",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "me",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"fname\": \"Chathura\",\r\n  \"lname\": \"Bandara\",\r\n  \"email\": \"chathurakavindu@gmail.com\",\r\n  \"password\": \"Password@123\",\r\n  \"phoneNumber\": \"0789362885\",\r\n  \"role\": \"ADMIN\"\r\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/user/me",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "user",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/auth/logout",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Clears the HttpOnly JWT cookie. 204 No Content."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "user",
+      "item": [
+        {
+          "name": "all",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/user/all?page=0&size=10",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "user",
+                "all"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getUsersByRole",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/user/by-role?role=PHI&page=0&size=20",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "user",
+                "by-role"
+              ],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "PHI",
+                  "description": "ADMIN | PHI | MOH | EPIDEMIOLOGIST | VOLUNTEER"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "ADMIN / MOH. Paginated users filtered by role."
+          },
+          "response": []
+        },
+        {
+          "name": "getUsersByRoleAndStatus",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/user/by-role-status?page=0&size=10&role=phi&status=pending",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "user",
+                "by-role-status"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "role",
+                  "value": "phi"
+                },
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "phi",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/user/phi?page=0&size=10",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "user",
+                "phi"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "uderbyid",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/user/2",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "user",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/user/2",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "user",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\"email\": \"chathurakavindu@gmail.com\",\r\n\"fname\": \"Chathura Kavindu\",\r\n\"lname\": \"Bandara\",\r\n\"phoneNumber\": \"0789362885\",\r\n\"district\":\"\",\r\n\"image\": \"https://www.google.com/search?q=https://example.com/images/my-new-profile-pic.jpg\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/user/update",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "user",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "status change",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/user/status?id=2&status=approved",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "user",
+                "status"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "2"
+                },
+                {
+                  "key": "status",
+                  "value": "approved"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Citizen",
+          "item": [
+            {
+              "name": "Fetch My Reports (Citizen)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Device-UUID",
+                    "value": "123e4567-e89b-12d3-a456-426614174000"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseURL}}/reports/my?page=0&size=20",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "reports",
+                    "my"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "20"
+                    }
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "Fetch My Reports (Citizen)",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "X-Device-UUID",
+                        "value": "123e4567-e89b-12d3-a456-426614174000"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseURL}}/reports/my?page=0&size=20",
+                      "host": [
+                        "{{baseURL}}"
+                      ],
+                      "path": [
+                        "reports",
+                        "my"
+                      ],
+                      "query": [
+                        {
+                          "key": "page",
+                          "value": "0"
+                        },
+                        {
+                          "key": "size",
+                          "value": "20"
+                        }
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "vary",
+                      "value": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+                    },
+                    {
+                      "key": "x-content-type-options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "x-xss-protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "cache-control",
+                      "value": "no-cache, no-store, max-age=0, must-revalidate"
+                    },
+                    {
+                      "key": "pragma",
+                      "value": "no-cache"
+                    },
+                    {
+                      "key": "expires",
+                      "value": "0"
+                    },
+                    {
+                      "key": "x-frame-options",
+                      "value": "DENY"
+                    },
+                    {
+                      "key": "content-type",
+                      "value": "application/json"
+                    },
+                    {
+                      "key": "transfer-encoding",
+                      "value": "chunked"
+                    },
+                    {
+                      "key": "date",
+                      "value": "Mon, 24 Aug 2026 18:53:55 GMT"
+                    },
+                    {
+                      "key": "keep-alive",
+                      "value": "timeout=60"
+                    },
+                    {
+                      "key": "connection",
+                      "value": "keep-alive"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"content\": [\n    {\n      \"id\": 3,\n      \"latitude\": 6.9271,\n      \"longitude\": 79.8612,\n      \"landType\": \"PUBLIC\",\n      \"reportStatus\": \"PENDING\",\n      \"districtName\": null,\n      \"cnnRiskLabel\": \"LOW_RISK\",\n      \"cnnConfidenceScore\": 0.0015,\n      \"submittedAt\": \"2026-08-24T22:49:47.567874\",\n      \"resolvedAt\": null\n    },\n    {\n      \"id\": 4,\n      \"latitude\": 6.82385,\n      \"longitude\": 79.92688,\n      \"landType\": \"PRIVATE\",\n      \"reportStatus\": \"PENDING\",\n      \"districtName\": \"Colombo\",\n      \"cnnRiskLabel\": \"HIGH_RISK\",\n      \"cnnConfidenceScore\": 0.9992,\n      \"submittedAt\": \"2026-08-25T00:11:24.755783\",\n      \"resolvedAt\": null\n    },\n    {\n      \"id\": 5,\n      \"latitude\": 6.82385,\n      \"longitude\": 79.92688,\n      \"landType\": \"PRIVATE\",\n      \"reportStatus\": \"CLASSIFIED\",\n      \"districtName\": \"Colombo\",\n      \"cnnRiskLabel\": \"HIGH_RISK\",\n      \"cnnConfidenceScore\": 0.9992,\n      \"submittedAt\": \"2026-08-25T00:22:00.210741\",\n      \"resolvedAt\": null\n    }\n  ],\n  \"totalPages\": 1,\n  \"totalItems\": 3\n}"
+                }
+              ]
+            },
+            {
+              "name": "Submit Report (Citizen)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Device-UUID",
+                    "value": "123e4567-e89b-12d3-a456-426614174000",
+                    "description": "Required device identifier for anonymous submission"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "latitude",
+                      "value": "6.825632484863221",
+                      "type": "text"
+                    },
+                    {
+                      "key": "longitude",
+                      "value": "79.92869306998575",
+                      "type": "text"
+                    },
+                    {
+                      "key": "landType",
+                      "value": "PUBLIC",
+                      "type": "text",
+                      "description": "Must be one of: PRIVATE, PUBLIC, UNKNOWN"
+                    },
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "description": "Select an image file from your system to upload",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/reports/save",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "reports",
+                    "save"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Fetch My Report by id(Citizen)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Device-UUID",
+                    "value": "123e4567-e89b-12d3-a456-426614174000"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseURL}}/reports/my/4",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "reports",
+                    "my",
+                    "4"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "Fetch My Report by id(Citizen)",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "X-Device-UUID",
+                        "value": "123e4567-e89b-12d3-a456-426614174000"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseURL}}/reports/my/4",
+                      "host": [
+                        "{{baseURL}}"
+                      ],
+                      "path": [
+                        "reports",
+                        "my",
+                        "4"
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "vary",
+                      "value": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+                    },
+                    {
+                      "key": "x-content-type-options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "x-xss-protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "cache-control",
+                      "value": "no-cache, no-store, max-age=0, must-revalidate"
+                    },
+                    {
+                      "key": "pragma",
+                      "value": "no-cache"
+                    },
+                    {
+                      "key": "expires",
+                      "value": "0"
+                    },
+                    {
+                      "key": "x-frame-options",
+                      "value": "DENY"
+                    },
+                    {
+                      "key": "content-type",
+                      "value": "application/json"
+                    },
+                    {
+                      "key": "transfer-encoding",
+                      "value": "chunked"
+                    },
+                    {
+                      "key": "date",
+                      "value": "Mon, 24 Aug 2026 18:54:00 GMT"
+                    },
+                    {
+                      "key": "keep-alive",
+                      "value": "timeout=60"
+                    },
+                    {
+                      "key": "connection",
+                      "value": "keep-alive"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"id\": 4,\n  \"latitude\": 6.82385,\n  \"longitude\": 79.92688,\n  \"landType\": \"PRIVATE\",\n  \"reportStatus\": \"PENDING\",\n  \"districtName\": \"Colombo\",\n  \"cnnRiskLabel\": \"HIGH_RISK\",\n  \"cnnConfidenceScore\": 0.9992,\n  \"submittedAt\": \"2026-08-25T00:11:24.755783\",\n  \"resolvedAt\": null\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "PHI",
+          "item": [
+            {
+              "name": "Fetch All Reports (PHI)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/reports/phi/district?page=0&size=20",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "reports",
+                    "phi",
+                    "district"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Requires Authentication. Since Step 3 sets an HttpOnly cookie, Postman will pass the JWT token cookie automatically here."
+              },
+              "response": []
+            },
+            {
+              "name": "get My Resolved Reports",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/reports/phi/my-resolved?page=0&size=20",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "reports",
+                    "phi",
+                    "my-resolved"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Requires Authentication. Since Step 3 sets an HttpOnly cookie, Postman will pass the JWT token cookie automatically here."
+              },
+              "response": [
+                {
+                  "name": "get My Resolved Reports",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseURL}}/reports/phi/my-resolved?page=0&size=20",
+                      "host": [
+                        "{{baseURL}}"
+                      ],
+                      "path": [
+                        "reports",
+                        "phi",
+                        "my-resolved"
+                      ],
+                      "query": [
+                        {
+                          "key": "page",
+                          "value": "0"
+                        },
+                        {
+                          "key": "size",
+                          "value": "20"
+                        }
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "vary",
+                      "value": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+                    },
+                    {
+                      "key": "x-content-type-options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "x-xss-protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "cache-control",
+                      "value": "no-cache, no-store, max-age=0, must-revalidate"
+                    },
+                    {
+                      "key": "pragma",
+                      "value": "no-cache"
+                    },
+                    {
+                      "key": "expires",
+                      "value": "0"
+                    },
+                    {
+                      "key": "x-frame-options",
+                      "value": "DENY"
+                    },
+                    {
+                      "key": "content-type",
+                      "value": "application/json"
+                    },
+                    {
+                      "key": "transfer-encoding",
+                      "value": "chunked"
+                    },
+                    {
+                      "key": "date",
+                      "value": "Wed, 26 Aug 2026 05:13:00 GMT"
+                    },
+                    {
+                      "key": "keep-alive",
+                      "value": "timeout=60"
+                    },
+                    {
+                      "key": "connection",
+                      "value": "keep-alive"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"latitude\": 6.82385,\n      \"longitude\": 79.92688,\n      \"landType\": \"PRIVATE\",\n      \"reportStatus\": \"RESOLVED\",\n      \"districtName\": \"Colombo\",\n      \"cnnRiskLabel\": \"HIGH_RISK\",\n      \"cnnConfidenceScore\": 0.9992,\n      \"submittedAt\": \"2026-08-26T10:17:58.200005\",\n      \"dispatchedByEmail\": \"chathurakavindu15@gmail.com\",\n      \"dispatchedAt\": \"2026-08-26T10:36:48.680738\",\n      \"resolvedByEmail\": \"chathurakavindu15@gmail.com\",\n      \"resolvedAt\": \"2026-08-26T10:41:21.197668\",\n      \"resolvedByDisplayName\": null,\n      \"resolution\": {\n        \"id\": 1,\n        \"reportId\": 1,\n        \"resolvedByName\": \"Chathura Bandara\",\n        \"resolvedAt\": \"2026-08-26T10:41:21.197668\",\n        \"action\": \"TREATED\",\n        \"notes\": \"Found and removed standing water in vehicle tyre near compound. Advised resident on prevention.\"\n      }\n    }\n  ],\n  \"totalPages\": 1,\n  \"totalItems\": 1\n}"
+                }
+              ]
+            },
+            {
+              "name": "get District Resolved Reports",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/reports/phi/district/resolved",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "reports",
+                    "phi",
+                    "district",
+                    "resolved"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "get District Resolved Reports",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseURL}}/reports/phi/district/resolved",
+                      "host": [
+                        "{{baseURL}}"
+                      ],
+                      "path": [
+                        "reports",
+                        "phi",
+                        "district",
+                        "resolved"
+                      ]
+                    }
+                  },
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "vary",
+                      "value": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+                    },
+                    {
+                      "key": "x-content-type-options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "x-xss-protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "cache-control",
+                      "value": "no-cache, no-store, max-age=0, must-revalidate"
+                    },
+                    {
+                      "key": "pragma",
+                      "value": "no-cache"
+                    },
+                    {
+                      "key": "expires",
+                      "value": "0"
+                    },
+                    {
+                      "key": "x-frame-options",
+                      "value": "DENY"
+                    },
+                    {
+                      "key": "content-type",
+                      "value": "application/json"
+                    },
+                    {
+                      "key": "transfer-encoding",
+                      "value": "chunked"
+                    },
+                    {
+                      "key": "date",
+                      "value": "Wed, 26 Aug 2026 05:13:13 GMT"
+                    },
+                    {
+                      "key": "keep-alive",
+                      "value": "timeout=60"
+                    },
+                    {
+                      "key": "connection",
+                      "value": "keep-alive"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"latitude\": 6.82385,\n      \"longitude\": 79.92688,\n      \"landType\": \"PRIVATE\",\n      \"reportStatus\": \"RESOLVED\",\n      \"districtName\": \"Colombo\",\n      \"cnnRiskLabel\": \"HIGH_RISK\",\n      \"cnnConfidenceScore\": 0.9992,\n      \"submittedAt\": \"2026-08-26T10:17:58.200005\",\n      \"dispatchedByEmail\": \"chathurakavindu15@gmail.com\",\n      \"dispatchedAt\": \"2026-08-26T10:36:48.680738\",\n      \"resolvedByEmail\": \"chathurakavindu15@gmail.com\",\n      \"resolvedAt\": \"2026-08-26T10:41:21.197668\",\n      \"resolvedByDisplayName\": null,\n      \"resolution\": {\n        \"id\": 1,\n        \"reportId\": 1,\n        \"resolvedByName\": \"Chathura Bandara\",\n        \"resolvedAt\": \"2026-08-26T10:41:21.197668\",\n        \"action\": \"TREATED\",\n        \"notes\": \"Found and removed standing water in vehicle tyre near compound. Advised resident on prevention.\"\n      }\n    }\n  ],\n  \"totalPages\": 1,\n  \"totalItems\": 1\n}"
+                }
+              ]
+            },
+            {
+              "name": "get District Resolution By ReportId",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/reports/phi/district/resolved/1",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "reports",
+                    "phi",
+                    "district",
+                    "resolved",
+                    "1"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Dispatch Report (CLASSIFIED → DISPATCHED)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('200 OK', () => pm.response.to.have.status(200));\nconst body = pm.response.json();\npm.test('Status is DISPATCHED', () => pm.expect(body.reportStatus).to.eql('DISPATCHED'));\npm.test('dispatchedAt is set', () => pm.expect(body.dispatchedAt).to.not.be.null);\npm.test('dispatchedByEmail is set', () => pm.expect(body.dispatchedByEmail).to.not.be.null);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"status\":\"DISPATCHED\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/reports/1/status",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "reports",
+                    "1",
+                    "status"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Fetch All Reports (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/reports/all?page=0&size=20",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "reports",
+                "all"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "CLASSIFIED",
+                  "disabled": true,
+                  "description": "PENDING | CLASSIFIED | DISPATCHED | RESOLVED | DISMISSED | REJECTED"
+                },
+                {
+                  "key": "districtId",
+                  "value": "{{districtId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "landType",
+                  "value": "PUBLIC",
+                  "disabled": true,
+                  "description": "PRIVATE | PUBLIC | UNKNOWN"
+                }
+              ]
+            },
+            "description": "Requires Authentication. Since Step 3 sets an HttpOnly cookie, Postman will pass the JWT token cookie automatically here."
+          },
+          "response": []
+        },
+        {
+          "name": "get Report By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/reports/1",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "reports",
+                "1"
+              ]
+            },
+            "description": "Requires Authentication. Since Step 3 sets an HttpOnly cookie, Postman will pass the JWT token cookie automatically here."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Resolution",
+      "item": [
+        {
+          "name": "Resolve Report (DISPATCHED → RESOLVED)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  ""
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"action\":\"TREATED\",\r\n    \"notes\":\"Found and removed standing water in vehicle tyre near compound. Advised resident on prevention.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/resolutions/1",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "resolutions",
+                "1"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Resolve Report (DISPATCHED → RESOLVED)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"action\":\"TREATED\",\r\n    \"notes\":\"Found and removed standing water in vehicle tyre near compound. Advised resident on prevention.\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/resolutions/1",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "resolutions",
+                    "1"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-xss-protection",
+                  "value": "0"
+                },
+                {
+                  "key": "cache-control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "expires",
+                  "value": "0"
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "transfer-encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "date",
+                  "value": "Wed, 26 Aug 2026 05:11:21 GMT"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"reportId\": 1,\n  \"resolvedByName\": \"Chathura Bandara\",\n  \"resolvedAt\": \"2026-08-26T10:41:21.197668\",\n  \"action\": \"TREATED\",\n  \"notes\": \"Found and removed standing water in vehicle tyre near compound. Advised resident on prevention.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Resolution By ReportId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/resolutions/{{reportId}}",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "resolutions",
+                "{{reportId}}"
+              ]
+            },
+            "description": "PHI / MOH / ADMIN / EPIDEMIOLOGIST. Returns the resolution record for a report."
+          },
+          "response": []
+        },
+        {
+          "name": "Duplicate Resolution → 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"action\":\"TREATED\",\r\n    \"notes\":\"Trying to resolve again.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/resolutions/8",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "resolutions",
+                "8"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Duplicate Resolution → 409",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"action\":\"TREATED\",\r\n    \"notes\":\"Trying to resolve again.\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/resolutions/1",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "resolutions",
+                    "1"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "vary",
+                  "value": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-xss-protection",
+                  "value": "0"
+                },
+                {
+                  "key": "cache-control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "expires",
+                  "value": "0"
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "transfer-encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "date",
+                  "value": "Wed, 26 Aug 2026 05:11:48 GMT"
+                },
+                {
+                  "key": "keep-alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"path\": \"/api/v1/resolutions/1\",\n  \"message\": \"Report id=1 is already in a terminal state: RESOLVED. Only DISPATCHED reports can be resolved.\",\n  \"timestamp\": \"2026-08-26T10:41:48.290343900\",\n  \"status\": 409\n}"
+            }
+          ]
+        },
+        {
+          "name": "Resolve non-DISPATCHED report → 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  ""
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"action\":\"TREATED\",\r\n    \"notes\":\"Test.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/resolutions/1",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "resolutions",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Missing notes → 400 Validation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  ""
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"action\":\"TREATED\",\r\n    \"notes\":\"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/resolutions/1",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "resolutions",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "status → RESOLVED blocked → 400",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  ""
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"status\":\"RESOLVED\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/reports/1/status",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "reports",
+                "1",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Public (Citizen)",
+      "item": [
+        {
+          "name": "Outbreak Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/public/outbreak-summary",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "public",
+                "outbreak-summary"
+              ]
+            },
+            "description": "No auth. National weekly cases, year total, hotspot count, high-risk districts, banner."
+          },
+          "response": []
+        },
+        {
+          "name": "Hotspots",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/public/hotspots",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "public",
+                "hotspots"
+              ]
+            },
+            "description": "No auth. Active/alerted clusters + HIGH_RISK classified/dispatched reports."
+          },
+          "response": []
+        },
+        {
+          "name": "Alerts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/public/alerts",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "public",
+                "alerts"
+              ]
+            },
+            "description": "No auth. Cluster-based citizen alerts."
+          },
+          "response": []
+        },
+        {
+          "name": "Districts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/public/districts",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "public",
+                "districts"
+              ]
+            },
+            "description": "No auth. All districts with rdhsId and centroid coordinates."
+          },
+          "response": []
+        },
+        {
+          "name": "Latest Forecasts (all districts)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/public/forecasts",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "public",
+                "forecasts"
+              ]
+            },
+            "description": "No auth. Latest LSTM forecast per district."
+          },
+          "response": []
+        },
+        {
+          "name": "District Status (by GPS)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/public/district-status?latitude=6.9271&longitude=79.8612",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "public",
+                "district-status"
+              ],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "6.9271",
+                  "description": "Colombo approx."
+                },
+                {
+                  "key": "longitude",
+                  "value": "79.8612"
+                },
+                {
+                  "key": "rdhsId",
+                  "value": "4",
+                  "disabled": true,
+                  "description": "Use instead of lat/lng. Colombo = 4"
+                }
+              ]
+            },
+            "description": "No auth. Pass latitude+longitude OR rdhsId. Returns risk, trend, weekly cases, forecast."
+          },
+          "response": []
+        },
+        {
+          "name": "District Status (by rdhsId)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/public/district-status?rdhsId={{rdhsId}}",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "public",
+                "district-status"
+              ],
+              "query": [
+                {
+                  "key": "rdhsId",
+                  "value": "{{rdhsId}}",
+                  "description": "Colombo = 4 (V7 LSTM LabelEncoder)"
+                }
+              ]
+            },
+            "description": "No auth. Alternative to GPS lookup."
+          },
+          "response": []
+        }
+      ],
+      "description": "Unauthenticated citizen app APIs. PermitAll in SecurityConfig."
+    },
+    {
+      "name": "Weekly Cases",
+      "item": [
+        {
+          "name": "List Weekly Cases",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/cases?page=0&size=26",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "cases"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "26"
+                },
+                {
+                  "key": "districtId",
+                  "value": "{{districtId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "district",
+                  "value": "Colombo",
+                  "disabled": true
+                },
+                {
+                  "key": "fromDate",
+                  "value": "2025-01-01",
+                  "disabled": true,
+                  "description": "ISO date"
+                },
+                {
+                  "key": "toDate",
+                  "value": "2026-08-29",
+                  "disabled": true,
+                  "description": "ISO date"
+                }
+              ]
+            },
+            "description": "ADMIN / MOH / EPIDEMIOLOGIST / PHI. PHI is scoped to their own district."
+          },
+          "response": []
+        },
+        {
+          "name": "Weekly Case Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/cases/summary",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "cases",
+                "summary"
+              ]
+            },
+            "description": "ADMIN / MOH / EPIDEMIOLOGIST / PHI. National or district-scoped KPI summary."
+          },
+          "response": []
+        }
+      ],
+      "description": "Authenticated dengue weekly-case queries."
+    },
+    {
+      "name": "Admin Cases",
+      "item": [
+        {
+          "name": "Add / Upsert Weekly Case",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/admin/cases",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "admin",
+                "cases"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"districtId\": 1,\n  \"district\": \"Colombo\",\n  \"weekStartDate\": \"2026-08-17\",\n  \"weekEndDate\": \"2026-08-23\",\n  \"weekCases\": 42,\n  \"cumulativeCases\": 1200\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "ADMIN / MOH / EPIDEMIOLOGIST. 201 if created, 200 if updated. district or districtId required."
+          },
+          "response": []
+        },
+        {
+          "name": "Import Weekly Cases CSV",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/admin/cases/csv",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "admin",
+                "cases",
+                "csv"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Weekly dengue case CSV"
+                }
+              ]
+            },
+            "description": "ADMIN / MOH / EPIDEMIOLOGIST. multipart field name must be 'file'."
+          },
+          "response": []
+        }
+      ],
+      "description": "Staff ingest of weekly dengue cases (JSON row or CSV)."
+    },
+    {
+      "name": "Forecasts",
+      "item": [
+        {
+          "name": "Latest Forecast by rdhsId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/forecasts/{{rdhsId}}/latest",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "forecasts",
+                "{{rdhsId}}",
+                "latest"
+              ]
+            },
+            "description": "ADMIN / PHI / MOH / EPIDEMIOLOGIST. Colombo rdhsId = 4."
+          },
+          "response": []
+        },
+        {
+          "name": "Regenerate Forecast (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/admin/forecasts/{{rdhsId}}/regenerate",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "admin",
+                "forecasts",
+                "{{rdhsId}}",
+                "regenerate"
+              ]
+            },
+            "description": "ADMIN only. Calls LSTM pipeline. 200 generated, 422 incomplete history, 504 timeout, 502 upstream, 409 conflict."
+          },
+          "response": []
+        }
+      ],
+      "description": "District LSTM forecasts. rdhsId 0-25 (Colombo = 4)."
+    },
+    {
+      "name": "Clusters",
+      "item": [
+        {
+          "name": "Detect Cluster for District",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/admin/clusters/detect?districtId={{districtId}}",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "admin",
+                "clusters",
+                "detect"
+              ],
+              "query": [
+                {
+                  "key": "districtId",
+                  "value": "{{districtId}}"
+                }
+              ]
+            },
+            "description": "ADMIN / PHI. Runs hotspot clustering for one district."
+          },
+          "response": []
+        }
+      ],
+      "description": "Manual cluster detection trigger."
+    },
+    {
+      "name": "Telegram",
+      "item": [
+        {
+          "name": "Webhook /register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{serverURL}}/telegram/webhook",
+              "host": [
+                "{{serverURL}}"
+              ],
+              "path": [
+                "telegram",
+                "webhook"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"update_id\": 1,\n  \"message\": {\n    \"chat\": { \"id\": 123456789 },\n    \"text\": \"/register YOUR_CODE\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Called by Telegram, not the app. Path is /telegram/webhook (NOT under /api/v1)."
+          },
+          "response": []
+        }
+      ],
+      "description": "Bot webhook. Uses {{serverURL}} because it is not under /api/v1."
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseURL",
+      "value": "http://localhost:8080/api/v1"
+    },
+    {
+      "key": "serverURL",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "reportId",
+      "value": "1"
+    },
+    {
+      "key": "districtId",
+      "value": "1"
+    },
+    {
+      "key": "rdhsId",
+      "value": "4"
+    },
+    {
+      "key": "deviceUUID",
+      "value": "123e4567-e89b-12d3-a456-426614174000"
+    }
+  ]
+}
