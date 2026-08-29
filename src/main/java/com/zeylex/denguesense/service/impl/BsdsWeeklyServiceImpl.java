@@ -21,14 +21,12 @@ import java.util.Set;
 
 @Service
 public class BsdsWeeklyServiceImpl implements BsdsWeeklyService {
-
     private static final Logger log = LoggerFactory.getLogger(BsdsWeeklyServiceImpl.class);
     private static final Set<ReportStatus> CONFIRMED_STATUSES = Set.of(
             ReportStatus.CLASSIFIED,
             ReportStatus.DISPATCHED,
             ReportStatus.RESOLVED
     );
-
     private final ReportRepo reportRepo;
     private final BSDSWeeklyRepo bsdsWeeklyRepo;
 

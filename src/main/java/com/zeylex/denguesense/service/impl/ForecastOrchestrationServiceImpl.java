@@ -168,10 +168,6 @@ public class ForecastOrchestrationServiceImpl implements ForecastOrchestrationSe
         }
     }
 
-    /**
-     * FastAPI may omit prediction intervals. Since the persisted columns are NOT NULL, fall back to
-     * the point estimate (a zero-width interval) and log, rather than failing the whole generation.
-     */
     private List<Double> boundsOrPointEstimate(List<Double> bounds, List<Double> predictions,
                                                String which, String districtName) {
         if (bounds != null && bounds.size() == predictions.size()) {
