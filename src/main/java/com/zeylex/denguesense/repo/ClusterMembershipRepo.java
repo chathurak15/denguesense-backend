@@ -16,8 +16,10 @@ public interface ClusterMembershipRepo extends JpaRepository<ClusterMembership, 
     boolean existsByCluster_IdAndReport_Id(Long clusterId, Long reportId);
 
     @Query("""
-            SELECT m FROM ClusterMembership m
-            JOIN FETCH m.report
+            SELECT DISTINCT m FROM ClusterMembership m
+            JOIN FETCH m.report r
+            LEFT JOIN FETCH r.cnnClassification
+            LEFT JOIN FETCH r.district
             WHERE m.cluster.id = :clusterId
             """)
     List<ClusterMembership> findWithReportsByCluster_Id(@Param("clusterId") Long clusterId);

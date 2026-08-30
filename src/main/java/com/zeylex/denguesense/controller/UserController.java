@@ -2,7 +2,11 @@ package com.zeylex.denguesense.controller;
 
 import com.zeylex.denguesense.dto.requestDTO.UserUpdateDTO;
 import com.zeylex.denguesense.dto.responseDTO.PaginatedDTO;
+import com.zeylex.denguesense.dto.responseDTO.TelegramAlertStatusDTO;
 import com.zeylex.denguesense.dto.responseDTO.UserResponseDTO;
+import com.zeylex.denguesense.model.User;
+import com.zeylex.denguesense.repo.UserRepo;
+import com.zeylex.denguesense.service.TelegramConnectService;
 import com.zeylex.denguesense.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +22,15 @@ import java.util.Map;
 @CrossOrigin
 public class UserController {
     private final UserService userService;
+    private final UserRepo userRepo;
+    private final TelegramConnectService telegramConnectService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService,
+                          UserRepo userRepo,
+                          TelegramConnectService telegramConnectService) {
         this.userService = userService;
+        this.userRepo = userRepo;
+        this.telegramConnectService = telegramConnectService;
     }
 
     // Get All
@@ -97,6 +107,30 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(userUpdateDTO));
     }
 
+    // Current User
+    @GetMapping("/me")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PHI', 'MOH', 'EPIDEMIOLOGIST', 'VOLUNTEER')")
+    public ResponseEntity<UserResponseDTO> getCurrentUserInfo(
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
+        return ResponseEntity.ok(userService.loadUserByUsername(userDetails.getUsername()));
+    }
+
+    @GetMapping("/telegram-alerts")
+    @PreAuthorize("hasRole('PHI')")
+    public ResponseEntity<TelegramAlertStatusDTO> telegramAlerts(
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
+        User user = userRepo.findByEmail(userDetails.getUsername());
+        return ResponseEntity.ok(telegramConnectService.statusFor(user));
+    }
+
+    @PostMapping("/telegram-alerts/sync")
+    @PreAuthorize("hasRole('PHI')")
+    public ResponseEntity<TelegramAlertStatusDTO> syncTelegramAlerts(
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
+        User user = userRepo.findByEmail(userDetails.getUsername());
+        return ResponseEntity.ok(telegramConnectService.syncFromTelegram(user));
+    }
+
     // Get By ID
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'EDITOR', 'CHIEF_EDITOR')")
@@ -110,13 +144,5 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.deleteUser(id));
-    }
-
-    // Current User
-    @GetMapping("/me")
-    @PreAuthorize("hasAnyRole('ADMIN', 'READER', 'WRITER', 'EDITOR', 'CHIEF_EDITOR')")
-    public ResponseEntity<UserResponseDTO> getCurrentUserInfo(
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
-        return ResponseEntity.ok(userService.loadUserByUsername(userDetails.getUsername()));
     }
 }

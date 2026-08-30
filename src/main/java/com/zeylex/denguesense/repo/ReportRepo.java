@@ -52,9 +52,9 @@ public interface ReportRepo extends JpaRepository<Report, Long>, JpaSpecificatio
                                              @Param("radiusMeters") double radiusMeters);
 
     /**
-     * District-wide open HIGH_RISK reports within the detection window. Backs the manual admin
-     * re-detection endpoint (ops recovery / demo). Distance grouping is intentionally omitted here
-     * because the persistence model keeps a single live cluster per district.
+     * District-wide open HIGH_RISK reports within the detection window. Candidate set for the
+     * manual admin re-detection endpoint; the trigger groups these into 500 m neighbourhoods
+     * before persisting so spatially distinct hotspots become separate clusters.
      */
     @Query(value = """
             SELECT r.*
@@ -64,6 +64,7 @@ public interface ReportRepo extends JpaRepository<Report, Long>, JpaSpecificatio
               AND r.report_status IN ('CLASSIFIED', 'DISPATCHED')
               AND c.risk_label = 'HIGH_RISK'
               AND r.submitted_at >= :since
+            ORDER BY r.submitted_at ASC, r.id ASC
             """, nativeQuery = true)
     List<Report> findActiveHighRiskByDistrict(@Param("districtId") Long districtId,
                                               @Param("since") LocalDateTime since);

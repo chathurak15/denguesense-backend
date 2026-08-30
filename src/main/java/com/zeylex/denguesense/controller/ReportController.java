@@ -39,10 +39,14 @@ public class ReportController {
     @PostMapping(value = "/save", consumes = "multipart/form-data")
     public ResponseEntity<ReportResponseDTO> saveReport(
             @RequestHeader("X-Device-UUID") String deviceUUID,
+            @RequestHeader(value = "X-FCM-Token", required = false) String fcmTokenHeader,
             @Valid @ModelAttribute ReportSubmitDTO dto,
+            @RequestParam(value = "fcmDeviceToken", required = false) String fcmTokenParam,
             @RequestPart("image") MultipartFile image) {
 
         validateDeviceUUID(deviceUUID);
+        dto.setFcmDeviceToken(firstNonBlank(
+                dto.getFcmDeviceToken(), fcmTokenParam, fcmTokenHeader));
         ReportResponseDTO response = reportService.saveReport(deviceUUID, dto, image);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -142,6 +146,18 @@ public class ReportController {
         ResolutionResponseDTO response = resolutionService
                 .getDistrictResolutionByReportId(reportId, currentUser.getUsername());
         return ResponseEntity.ok(response);
+    }
+
+    private static String firstNonBlank(String... values) {
+        if (values == null) {
+            return null;
+        }
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value.trim();
+            }
+        }
+        return null;
     }
 
     private void validateDeviceUUID(String deviceUUID) {

@@ -4,6 +4,8 @@ import com.zeylex.denguesense.dto.requestDTO.LoginDTO;
 import com.zeylex.denguesense.dto.responseDTO.LoginResponseDTO;
 import com.zeylex.denguesense.dto.responseDTO.UserResponseDTO;
 import com.zeylex.denguesense.repo.UserRepo;
+import com.zeylex.denguesense.service.OtpService;
+import com.zeylex.denguesense.service.UserService;
 import com.zeylex.denguesense.util.JwtUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,9 @@ public class JwtService implements UserDetailsService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -69,8 +74,7 @@ public class JwtService implements UserDetailsService {
             UserDetails userDetails = loadUserByUsername(email);
 
             String token = jwtUtil.generateToken(userDetails);
-            UserResponseDTO userResponseDTO = modelMapper.map(user, UserResponseDTO.class);
-            userResponseDTO.setDistrictName(user.getDistrict().getName());
+            UserResponseDTO userResponseDTO = userService.loadUserByUsername(email);
             return new LoginResponseDTO(userResponseDTO, token);
 
         } catch (Exception e) {
@@ -86,7 +90,7 @@ public class JwtService implements UserDetailsService {
 
         UserDetails userDetails = loadUserByUsername(email);
         String token = jwtUtil.generateToken(userDetails);
-        UserResponseDTO userResponseDTO = modelMapper.map(user, UserResponseDTO.class);
+        UserResponseDTO userResponseDTO = userService.loadUserByUsername(email);
         return new LoginResponseDTO(userResponseDTO, token);
     }
 
