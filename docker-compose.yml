@@ -7,6 +7,8 @@ services:
       POSTGRES_DB: ${DB:-denguesense}
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+      TZ: Asia/Colombo
+      PGTZ: Asia/Colombo
     ports:
       - "5433:5432"
     volumes:
@@ -28,6 +30,8 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       DB_HOST: postgres
       DB_PORT: "5432"
+      TZ: Asia/Colombo
+      JAVA_TOOL_OPTIONS: "-Duser.timezone=Asia/Colombo"
     ports:
       - "8081:8080"
     depends_on:

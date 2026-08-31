@@ -83,6 +83,8 @@ mvn test
 
 ## Production
 
+Server Docker, Nginx, `.env`, and database migrate: see [DEPLOY.md](DEPLOY.md).
+
 Activate the `prod` profile and supply environment variables. Common ones:
 
 | Variable | Purpose |
